@@ -1,13 +1,13 @@
 use pancurses::Window;
-use std::time::{Instant};
+use std::time::Instant;
 
 use crate::food::Food;
 use crate::snake::Snake;
 
-const SNAKE_DELAY:u128 = 100;
+const SNAKE_DELAY: u128 = 100;
 
 #[derive(Copy, Clone)]
-enum GameState{
+enum GameState {
     Running,
     Paused,
     GameOver,
@@ -31,21 +31,21 @@ impl Game {
             height: height,
             snake: Snake::new(),
             last_tick: Instant::now(),
-            food: Food::new(width,height),
+            food: Food::new(width, height),
             state: GameState::Running,
         }
     }
 
-    pub fn food_without_collision(&mut self){
-        let mut food_to_spawn = Food::new(self.width,self.height);
+    pub fn food_without_collision(&mut self) {
+        let mut food_to_spawn = Food::new(self.width, self.height);
         while self.snake.check_for_collision_with(food_to_spawn.get_pos()) {
-            food_to_spawn = Food::new(self.width,self.height);
+            food_to_spawn = Food::new(self.width, self.height);
         }
         self.food = food_to_spawn;
     }
 
-    pub fn pause(&mut self){
-        self.state = match self.state{
+    pub fn pause(&mut self) {
+        self.state = match self.state {
             GameState::Running => GameState::Paused,
             GameState::Paused => GameState::Running,
             GameState::GameOver => GameState::Running,
@@ -54,7 +54,7 @@ impl Game {
 
     fn draw_frame(&self, win: &Window) -> () {
         //Draw Border
-        const WALL_CHAR:char = '#';
+        const WALL_CHAR: char = '#';
         for y in 0..self.height {
             win.mvaddch(y, 0, WALL_CHAR);
             win.mvaddch(y, self.width, WALL_CHAR);
@@ -76,16 +76,16 @@ impl Game {
         self.food_without_collision();
     }
 
-    pub fn is_running(&self) -> bool{
-        match self.state{
+    pub fn is_running(&self) -> bool {
+        match self.state {
             GameState::Running => true,
             GameState::Paused => false,
             GameState::GameOver => false,
         }
     }
 
-    pub fn is_paused(&self) -> bool{
-        match self.state{
+    pub fn is_paused(&self) -> bool {
+        match self.state {
             GameState::Running => false,
             GameState::Paused => true,
             GameState::GameOver => false,
@@ -98,7 +98,7 @@ impl Game {
             self.snake.eat_food();
             self.food_without_collision();
         }
-        //Check for collision with wall and for collision with self 
+        //Check for collision with wall and for collision with self
         if self.snake.get_head().get_x() >= self.width
             || self.snake.get_head().get_x() <= 0
             || self.snake.get_head().get_y() >= self.height
@@ -118,15 +118,19 @@ impl Game {
             self.update_game();
             win.clear();
             self.draw_frame(win);
-            match self.state{
-                GameState::GameOver =>{
+            match self.state {
+                GameState::GameOver => {
                     self.game_over();
-                    win.mvprintw(self.height/2, self.width/2 - 4, "Game Over");
-                    win.mvprintw(self.height/2+1, self.width/2 - 11, "Backspace to try again");
-                    win.mvprintw(self.height/2+2, self.width/2 - 7, "Delete to quit");
+                    win.mvprintw(self.height / 2, self.width / 2 - 5, " Game Over ");
+                    win.mvprintw(
+                        self.height / 2 + 1,
+                        self.width / 2 - 12,
+                        " Backspace to try again ",
+                    );
+                    win.mvprintw(self.height / 2 + 2, self.width / 2 - 8, " Delete to quit ");
                 }
-                _ => ()
-        }
+                _ => (),
+            }
             win.refresh();
         }
     }

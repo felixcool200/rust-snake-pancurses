@@ -20,19 +20,21 @@ fn main() {
     loop {
         match window.getch() {
             Some(Input::Character(c)) => {
-                game.snake.change_dir(c);
+                if !game.is_paused() {
+                    game.snake.change_dir(c);
+                }
                 //window.addch(c);
             }
             Some(Input::KeyDC) => break,
             Some(Input::KeyBackspace) => {
                 game.pause();
                 //Draw Paused text
-                if game.is_paused(){
-                    window.mvprintw(game.height/2, game.width/2 - 7, "Game is paused");
+                if game.is_paused() {
+                    window.mvprintw(game.height / 2, game.width / 2 - 7, "Game is paused");
                 }
-            },
+            }
             Some(_input) => {
-            //    window.addstr(&format!("{:?}", input));
+                //    window.addstr(&format!("{:?}", input));
             }
             None => (),
         }

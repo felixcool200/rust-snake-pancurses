@@ -2,6 +2,7 @@ use crate::point::Point;
 use pancurses::Window;
 use std::collections::VecDeque;
 
+#[derive(PartialEq, Eq, Copy, Clone)]
 enum Direction {
     Left,
     Right,
@@ -11,6 +12,7 @@ enum Direction {
 
 pub struct Snake {
     dir: Direction,
+    last_dir: Direction,
     body: VecDeque<Point>,
     foods_eaten: u32,
 }
@@ -19,6 +21,7 @@ impl Snake {
     pub fn new() -> Snake {
         Snake {
             dir: Direction::Right,
+            last_dir: Direction::Right,
             body: VecDeque::from([Point::new(10, 10), Point::new(11, 10)]),
             foods_eaten: 0,
         }
@@ -26,22 +29,26 @@ impl Snake {
 
     pub fn change_dir(&mut self, c: char) {
         match c {
-            'w' => self.dir = match self.dir {
-                    Direction::Down => Direction::Down,
-                    _ => Direction::Up,
-                    },
-            'a' => self.dir = match self.dir {
-                Direction::Right => Direction::Right,
-                _ => Direction::Left,
-                },
-            's' => self.dir = match self.dir {
-                Direction::Up => Direction::Up,
-                _ => Direction::Down,
-                },
-            'd' => self.dir = match self.dir {
-                Direction::Left => Direction::Left,
-                _ => Direction::Right,
-                },            
+            'w' => {
+                if self.last_dir != Direction::Down {
+                    self.dir = Direction::Up;
+                }
+            }
+            'a' => {
+                if self.last_dir != Direction::Right {
+                    self.dir = Direction::Left
+                }
+            }
+            's' => {
+                if self.last_dir != Direction::Up {
+                    self.dir = Direction::Down
+                }
+            }
+            'd' => {
+                if self.last_dir != Direction::Left {
+                    self.dir = Direction::Right
+                }
+            }
             _ => (),
         };
     }
@@ -66,7 +73,7 @@ impl Snake {
         return false;
     }
 
-    pub fn check_for_collision_with(&self,other:Point) -> bool {
+    pub fn check_for_collision_with(&self, other: Point) -> bool {
         for i in 1..self.body.len() {
             if self.body[i] == other {
                 return true;
@@ -86,7 +93,7 @@ impl Snake {
             Direction::Up => self.body.push_front(self.get_head().dec_y()),
             Direction::Down => self.body.push_front(self.get_head().inc_y()),
         }
-
+        self.last_dir = self.dir.clone();
         //Add size if snake has eaten any food
         if self.foods_eaten > 0 {
             self.foods_eaten -= 1;
